@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from peewee import *
 import peewee
 from dotenv import load_dotenv
@@ -39,7 +39,6 @@ class MovieActor(BaseModel):
 def index():
     return 'Hello World.'
 
-
 @app.route('/api/movies', methods = ['GET'])
 def get_movies():
     with db.connection_context():
@@ -52,6 +51,14 @@ def get_movie(id):
         movie = Movie.get(Movie.id == id)
     return {'name': movie.title}, 200
 
+@app.route('/api/movies', methods = ['POST'])
+def create_movie():
+    movie = request.json
+    name = movie['name']
+    with db.connection_context():
+        Movie.create(title = name)
+    return {'movie':f'{name} was created'}, 201
+        
 
         
 
