@@ -1,4 +1,4 @@
-from flask import Flask 
+from flask import Flask, jsonify
 from peewee import *
 import peewee
 from dotenv import load_dotenv
@@ -16,22 +16,36 @@ class BaseModel(Model):
         database = db
 
 class Actor(BaseModel):
-    name = CharField(50)
-
+    name = CharField(unique = True)
+    def to_dict(self):
+        return{
+            'name': self.name
+        }
 
 class Movie(BaseModel):
-    actor_id = ForeignKeyField(Actor, backref = 'actor_id')
-    title = CharField(50)
-    year = IntegerField
-    time = IntegerField
+    title = CharField(unique = True)
+    def to_dict(self):
+        return{
+            'id': self.id,
+            'title': self.title
+        }
+
+class MovieActor(BaseModel):
+    actor_id = ForeignKeyField(Actor)
+    movie_id = ForeignKeyField(Movie)
 
 
 @app.route('/')
 def index():
     return 'Hello World.'
 
-db.connect()
-db.create_tables([Actor, Movie])
+
+@app.route('/api/movies', methods = ['GET'])
+def get_movies():
+    with db.connection_context():
+        movies = Movie.select()
+        return jsonify({'movies': [movie.to_dict() for movie in movies.execute()]}), 200
+        
 
 if __name__ == '__main__':
     app.run()
