@@ -45,6 +45,14 @@ def get_movies():
     with db.connection_context():
         movies = Movie.select()
         return jsonify({'movies': [movie.to_dict() for movie in movies.execute()]}), 200
+
+@app.route('/api/movies/<id>', methods = ['GET'])
+def get_movie(id):
+    with db.connection_context():
+        movie = Movie.get(Movie.id == id)
+    return {'name': movie.title}, 200
+
+
         
 
 if __name__ == '__main__':
