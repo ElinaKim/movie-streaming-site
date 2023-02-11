@@ -39,17 +39,20 @@ class MovieActor(BaseModel):
 def index():
     return 'Hello World.'
 
+
 @app.route('/api/movies', methods = ['GET'])
 def get_movies():
     with db.connection_context():
         movies = Movie.select()
         return jsonify({'movies': [movie.to_dict() for movie in movies.execute()]}), 200
 
+
 @app.route('/api/movies/<id>', methods = ['GET'])
 def get_movie(id):
     with db.connection_context():
         movie = Movie.get(Movie.id == id)
     return {'name': movie.title}, 200
+
 
 @app.route('/api/movies', methods = ['POST'])
 def create_movie():
@@ -60,7 +63,20 @@ def create_movie():
     return {'movie':f'{name} was created'}, 201
         
 
-        
+@app.route('/api/movies/<id>', methods = ['PUT'])
+def update_movie(id):
+    movie = request.json 
+    name = movie['name']
+    with db.connection_context():
+        Movie.update(title = name).where(Movie.id == id).execute()
+    return {'movie': f'{name} was updated'}, 200
+
+
+@app.route('/api/movies/<int:id>', methods = ['DELETE'])
+def delete_movie(id):
+    with db.connection_context():
+        Movie.delete().where(Movie.id == int(id)).execute()
+    return jsonify({'message': f'Movie with id {id} was deleted.'}), 200
 
 if __name__ == '__main__':
     app.run()
