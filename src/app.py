@@ -78,5 +78,45 @@ def delete_movie(id):
         Movie.delete().where(Movie.id == int(id)).execute()
     return jsonify({'message': f'Movie with id {id} was deleted.'}), 200
 
+
+
+@app.route('/api/actors', methods = ['GET'])
+def get_actors():
+    with db.connection_context():
+        actors = Actor.select()
+        return jsonify({'actors': [actor.to_dict() for actor in actors.execute()]}), 200
+
+
+@app.route('/api/actors/<id>', methods = ['GET'])
+def get_actor(id):
+    with db.connection_context():
+        actor = Actor.get(Actor.id == id)
+    return {'name': actor.name}, 200
+
+
+@app.route('/api/actors', methods = ['POST'])
+def create_actor():
+    actor = request.json
+    actor_name = actor['name']
+    with db.connection_context():
+        Actor.create(name = actor_name)
+    return {'actor':f'{actor_name} was created'}, 201
+        
+
+@app.route('/api/actors/<id>', methods = ['PUT'])
+def update_actor(id):
+    actor = request.json 
+    actor_name = actor['name']
+    with db.connection_context():
+        Actor.update(name = actor_name).where(Actor.id == id).execute()
+    return {'movie': f'{actor_name} was updated'}, 200
+
+
+@app.route('/api/actors/<int:id>', methods = ['DELETE'])
+def delete_actor(id):
+    with db.connection_context():
+        Actor.delete().where(Actor.id == int(id)).execute()
+    return jsonify({'message': f'Actor with id {id} was deleted.'}), 200
+
 if __name__ == '__main__':
     app.run()
